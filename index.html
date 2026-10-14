@@ -1,0 +1,753 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080d1b">
+<title>TOP1 Auto Token Studio</title>
+<style>
+:root {
+  --bg:#080d1b; --panel:#111a2e; --line:#263653;
+  --text:#edf4ff; --muted:#9cacc8; --blue:#35b9ff;
+  --green:#28dba0; --red:#ff7272;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; background:linear-gradient(145deg,#080d1b,#101a32);
+  color:var(--text); font-family:Arial,sans-serif; line-height:1.7;
+}
+header {
+  text-align:center; padding:22px 14px;
+  border-bottom:1px solid var(--line);
+}
+.logo {
+  width:60px; height:60px; margin:0 auto 10px;
+  display:grid; place-items:center; font-size:30px;
+  font-weight:bold; color:#061020;
+  background:linear-gradient(135deg,#44d4ff,#6685ff);
+  clip-path:polygon(50% 0,100% 100%,0 100%); padding-top:10px;
+}
+h1 { font-size:24px; margin:4px 0; }
+h2 { font-size:18px; margin:0 0 10px; }
+p { margin:8px 0; }
+.muted,.small { color:var(--muted); font-size:13px; }
+main { max-width:800px; margin:auto; padding:13px; }
+.card {
+  background:rgba(17,26,46,.97); border:1px solid var(--line);
+  border-radius:15px; padding:15px; margin-bottom:14px;
+}
+label {
+  display:block; color:#c5d4ee; font-size:13px; margin:11px 0 5px;
+}
+input,select,textarea {
+  display:block; width:100%; color:var(--text); background:#080f20;
+  border:1px solid #30415f; border-radius:9px; padding:12px;
+  font-size:15px;
+}
+input:focus,select:focus,textarea:focus { outline:1px solid var(--blue); }
+textarea { direction:ltr; text-align:left; min-height:95px; }
+button {
+  border:0; border-radius:9px; padding:12px; font-size:13px;
+  font-weight:bold; cursor:pointer; background:var(--blue); color:#04101d;
+}
+button.secondary {
+  color:var(--text); background:#263653; border:1px solid #3b4e70;
+}
+button.green { background:var(--green); }
+button:disabled { opacity:.45; cursor:not-allowed; }
+.buttons { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.buttons button { flex:1 1 135px; }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.status {
+  white-space:pre-wrap; overflow-wrap:anywhere; background:#080f20;
+  border:1px solid var(--line); border-radius:9px; padding:11px;
+  margin-top:10px; font-size:13px;
+}
+.status.ok { border-color:#168d6b; color:#9affd9; }
+.status.err { border-color:#a34353; color:#ffb5bd; }
+pre {
+  direction:ltr; text-align:left; white-space:pre-wrap;
+  overflow-wrap:anywhere; word-break:break-word; background:#050a14;
+  color:#b9f5d6; border:1px solid var(--line); border-radius:9px;
+  padding:12px; max-height:480px; overflow:auto; font-size:12px;
+}
+.note {
+  background:#0a1428; border-right:3px solid var(--blue);
+  border-radius:7px; padding:10px; font-size:13px; margin:10px 0;
+}
+a { color:var(--blue); overflow-wrap:anywhere; }
+footer { text-align:center; padding:18px; color:var(--muted); font-size:12px; }
+@media(max-width:460px) {
+  .grid { grid-template-columns:1fr; }
+  main { padding:9px; }
+  .card { padding:12px; }
+  h1 { font-size:21px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">1</div>
+  <h1>TOP1 Auto Token Studio</h1>
+  <p class="muted">Token Source Generator · Wallet · Contract Reader · Verify Guide</p>
+</header>
+
+<main>
+<section class="card">
+  <h2>01 — شبکه و شروع</h2>
+  <label for="network">شبکه مقصد</label>
+  <select id="network">
+    <option value="">انتخاب شبکه</option>
+    <option value="bsc">BNB Smart Chain — BEP-20</option>
+    <option value="tron">TRON Mainnet — TRC-20</option>
+  </select>
+  <div id="networkNote" class="status">ابتدا شبکه را انتخاب کنید.</div>
+  <div class="buttons">
+    <button id="startBtn">START</button>
+    <button id="connectBtn" class="secondary">CONNECT WALLET</button>
+    <button id="checkWalletBtn" class="secondary">CHECK WALLET</button>
+  </div>
+  <div id="walletStatus" class="status">کیف پول متصل نیست. برای تولید کد نیازی به اتصال نیست.</div>
+</section>
+
+<section class="card">
+  <h2>02 — مشخصات توکن جدید</h2>
+  <p class="muted">نام، نماد، اعشار و عرضه کل را وارد کنید.</p>
+
+  <label for="tokenName">Token Name — نام توکن</label>
+  <input id="tokenName" maxlength="40" placeholder="نام توکن">
+
+  <label for="tokenSymbol">Token Symbol — نماد</label>
+  <input id="tokenSymbol" maxlength="12" placeholder="نماد انگلیسی">
+
+  <div class="grid">
+    <div>
+      <label for="decimals">Decimals — اعشار</label>
+      <select id="decimals">
+        <option value="">انتخاب اعشار</option>
+        <option value="18">18</option>
+        <option value="8">8</option>
+        <option value="6">6</option>
+        <option value="0">0</option>
+      </select>
+    </div>
+    <div>
+      <label for="supply">Whole Token Supply — عرضه کل</label>
+      <input id="supply" type="number" min="1" step="1" placeholder="مثلاً 1000000">
+    </div>
+  </div>
+
+  <div id="supplyStatus" class="status">ابتدا مشخصات را وارد کنید.</div>
+  <div class="buttons">
+    <button id="generateBtn" class="green">GENERATE CONTRACT</button>
+    <button id="copyBtn" class="secondary">COPY SOURCE</button>
+    <button id="saveBtn" class="secondary">SAVE .SOL FILE</button>
+  </div>
+  <div id="generateStatus" class="status">هنوز قراردادی تولید نشده است.</div>
+</section>
+
+<section class="card">
+  <h2>03 — کد قرارداد جدید</h2>
+  <p class="muted">کد تولیدشده با تنظیمات فعلی در این قسمت نمایش داده می‌شود.</p>
+  <pre id="sourceOutput">// No contract generated.</pre>
+</section>
+
+<section class="card">
+  <h2>04 — آدرس قرارداد منتشرشده</h2>
+  <p class="muted">پس از Deploy، آدرس واقعی قرارداد را وارد کنید.</p>
+  <label for="contractAddress">Contract Address</label>
+  <input id="contractAddress" dir="ltr" placeholder="آدرس قرارداد پس از Deploy">
+  <div class="buttons">
+    <button id="readBtn">READ CONTRACT</button>
+    <button id="explorerBtn" class="secondary">OPEN EXPLORER</button>
+    <button id="copyAddressBtn" class="secondary">COPY ADDRESS</button>
+  </div>
+  <div id="readStatus" class="status">هنوز آدرس قراردادی وارد نشده است.</div>
+  <div id="tokenDetails" class="status">اطلاعات قرارداد پس از خواندن نمایش داده می‌شود.</div>
+</section>
+
+<section class="card">
+  <h2>05 — Compile و Deploy</h2>
+  <p class="muted">برای BNB از Remix استفاده کنید. برای TRON از محیط توسعه سازگار با TRON استفاده کنید.</p>
+  <div class="buttons">
+    <button id="compilerBtn">OPEN COMPILER</button>
+    <button id="deployBtn" class="secondary">OPEN DEPLOY TOOL</button>
+  </div>
+  <div class="note">
+    این اپ کد تولید می‌کند اما خودش قرارداد را Deploy نمی‌کند.
+    انتشار روی شبکه اصلی به کارمزد شبکه نیاز دارد.
+  </div>
+</section>
+
+<section class="card">
+  <h2>06 — Verify Contract</h2>
+  <p class="muted">پس از انتشار قرارداد، آدرس را در بخش 04 وارد کنید و صفحه Verify را باز کنید.</p>
+  <div class="note">
+    وریفای به کد دقیق منتشرشده، نسخه کامپایلر و تنظیمات کامپایل وابسته است.
+    این نسخه وریفای را خودکار انجام نمی‌دهد.
+  </div>
+  <div class="buttons">
+    <button id="verifyBtn" class="green">OPEN VERIFY PAGE</button>
+  </div>
+  <div id="verifyStatus" class="status">شبکه را انتخاب کنید.</div>
+</section>
+
+<section class="card">
+  <h2>امنیت</h2>
+  <p class="muted">
+    هرگز Seed Phrase یا Private Key را در این اپ وارد نکنید.
+    نام USDT یا هر نام دیگری به‌تنهایی توکن را به ارز رسمی یا دارای پشتوانه تبدیل نمی‌کند.
+  </p>
+</section>
+</main>
+
+<footer>TOP1 Auto Token Studio · Source Generator · No automatic deployment</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js"></script>
+<script>
+"use strict";
+
+const $ = id => document.getElementById(id);
+
+let generatedSource = "";
+let generatedConfig = null;
+let walletAddress = "";
+
+function setStatus(id, message, type = "") {
+  const el = $(id);
+  el.textContent = message;
+  el.className = "status" + (type ? " " + type : "");
+}
+
+function getNetwork() {
+  const network = $("network").value;
+  if (!network) throw new Error("ابتدا شبکه مقصد را انتخاب کنید.");
+  return network;
+}
+
+function invalidateSource(message) {
+  generatedSource = "";
+  generatedConfig = null;
+  $("sourceOutput").textContent = "// " + message;
+  setStatus("generateStatus", message);
+}
+
+function updateNetworkInfo() {
+  const network = $("network").value;
+
+  if (!network) {
+    $("networkNote").textContent = "ابتدا شبکه را انتخاب کنید.";
+    $("connectBtn").disabled = false;
+    setStatus("verifyStatus", "شبکه را انتخاب کنید.");
+    return;
+  }
+
+  if (network === "bsc") {
+    $("networkNote").textContent =
+      "BNB Smart Chain انتخاب شد. کد Solidity برای استفاده به‌عنوان توکن BEP-20 تولید می‌شود.";
+    $("connectBtn").disabled = false;
+    setStatus(
+      "verifyStatus",
+      "پس از Deploy، صفحه Verify در BscScan را باز کنید. وریفای دستی است."
+    );
+  } else {
+    $("networkNote").textContent =
+      "TRON انتخاب شد. کد Solidity پایه تولید می‌شود؛ سازگاری آن را در محیط TRON بررسی و آزمایش کنید.";
+    $("connectBtn").disabled = true;
+    setStatus(
+      "verifyStatus",
+      "پس از Deploy، از TronScan برای بررسی قرارداد استفاده کنید. وریفای دستی است."
+    );
+  }
+}
+
+function getConfig() {
+  const network = getNetwork();
+  const name = $("tokenName").value.trim();
+  const symbol = $("tokenSymbol").value.trim();
+  const decimalsText = $("decimals").value;
+  const supplyText = $("supply").value.trim();
+
+  if (!name || name.length > 40) {
+    throw new Error("نام توکن را با 1 تا 40 نویسه وارد کنید.");
+  }
+
+  if (!/^[A-Za-z0-9_-]{1,12}$/.test(symbol)) {
+    throw new Error("نماد باید 1 تا 12 حرف انگلیسی، عدد، _ یا - باشد.");
+  }
+
+  if (decimalsText === "") {
+    throw new Error("تعداد اعشار را انتخاب کنید.");
+  }
+
+  const decimals = Number(decimalsText);
+  if (![0, 6, 8, 18].includes(decimals)) {
+    throw new Error("تعداد اعشار نامعتبر است.");
+  }
+
+  if (!/^[0-9]+$/.test(supplyText)) {
+    throw new Error("عرضه باید عدد صحیح مثبت باشد.");
+  }
+
+  const supply = BigInt(supplyText);
+
+  if (supply < 1n || supply > 1000000000000000000n) {
+    throw new Error("عرضه باید بین 1 و 1,000,000,000,000,000,000 باشد.");
+  }
+
+  const rawSupply = supply * (10n ** BigInt(decimals));
+
+  if (rawSupply > (2n ** 256n - 1n)) {
+    throw new Error("عرضه از ظرفیت uint256 بیشتر است.");
+  }
+
+  return { network, name, symbol, decimals, supply, rawSupply };
+}
+
+function escapeSolidity(value) {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+function buildContract(c) {
+  const name = escapeSolidity(c.name);
+  const symbol = escapeSolidity(c.symbol);
+  const standard = c.network === "bsc"
+    ? "BEP-20 compatible token for BNB Smart Chain"
+    : "TRC-20 style token for TRON; test in a compatible environment";
+
+  return `// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+/*
+ * Generated by TOP1 Auto Token Studio.
+ * Intended standard: ${standard}
+ * Fixed supply; no mint function or owner backdoor.
+ * Review, compile and test before deployment.
+ */
+contract GeneratedToken {
+    string public name = "${name}";
+    string public symbol = "${symbol}";
+    uint8 public constant decimals = ${c.decimals};
+    uint256 public totalSupply = ${c.rawSupply};
+
+    mapping(address => uint256) public balanceOf;
+    mapping(address => mapping(address => uint256)) public allowance;
+
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
+    constructor() {
+        balanceOf[msg.sender] = totalSupply;
+        emit Transfer(address(0), msg.sender, totalSupply);
+    }
+
+    function transfer(address to, uint256 value) external returns (bool) {
+        require(to != address(0), "Invalid recipient");
+        require(balanceOf[msg.sender] >= value, "Insufficient balance");
+        balanceOf[msg.sender] -= value;
+        balanceOf[to] += value;
+        emit Transfer(msg.sender, to, value);
+        return true;
+    }
+
+    function approve(address spender, uint256 value) external returns (bool) {
+        require(spender != address(0), "Invalid spender");
+        allowance[msg.sender][spender] = value;
+        emit Approval(msg.sender, spender, value);
+        return true;
+    }
+
+    function transferFrom(address from, address to, uint256 value)
+        external returns (bool)
+    {
+        require(from != address(0) && to != address(0), "Invalid address");
+        require(balanceOf[from] >= value, "Insufficient balance");
+
+        uint256 allowed = allowance[from][msg.sender];
+        require(allowed >= value, "Allowance exceeded");
+
+        if (allowed != type(uint256).max) {
+            allowance[from][msg.sender] = allowed - value;
+        }
+
+        balanceOf[from] -= value;
+        balanceOf[to] += value;
+        emit Transfer(from, to, value);
+        return true;
+    }
+}
+`;
+}
+
+function generateContract() {
+  generatedSource = "";
+  generatedConfig = null;
+  $("sourceOutput").textContent = "// Generating...";
+
+  try {
+    const c = getConfig();
+    generatedSource = buildContract(c);
+    generatedConfig = c;
+    $("sourceOutput").textContent = generatedSource;
+
+    setStatus(
+      "generateStatus",
+      "کد تولید شد؛ هنوز Deploy نشده است.\n" +
+      "Network: " + (c.network === "bsc" ? "BNB Smart Chain" : "TRON") + "\n" +
+      "Name: " + c.name + "\n" +
+      "Symbol: " + c.symbol + "\n" +
+      "Decimals: " + c.decimals + "\n" +
+      "Supply: " + c.supply.toString(),
+      "ok"
+    );
+
+    setStatus(
+      "supplyStatus",
+      "Whole supply: " + c.supply.toString() +
+      "\nRaw units: " + c.rawSupply.toString(),
+      "ok"
+    );
+  } catch (error) {
+    invalidateSource("کد تولید نشد؛ مشخصات را بررسی کنید.");
+    setStatus("generateStatus", error.message || "خطای نامشخص", "err");
+  }
+}
+
+function updateSupply() {
+  try {
+    const c = getConfig();
+    setStatus(
+      "supplyStatus",
+      "Whole supply: " + c.supply.toString() +
+      "\nRaw units: " + c.rawSupply.toString(),
+      "ok"
+    );
+  } catch (error) {
+    setStatus("supplyStatus", error.message || "مشخصات ناقص است.");
+  }
+}
+
+async function copySource() {
+  if (!generatedSource || !generatedConfig) {
+    setStatus("generateStatus", "ابتدا مشخصات را وارد و Generate را بزنید.", "err");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(generatedSource);
+    setStatus("generateStatus", "کد قرارداد کپی شد.", "ok");
+  } catch (_) {
+    const area = document.createElement("textarea");
+    area.value = generatedSource;
+    area.style.position = "fixed";
+    area.style.opacity = "0";
+    document.body.appendChild(area);
+    area.select();
+
+    let copied = false;
+    try { copied = document.execCommand("copy"); } catch (_) {}
+
+    area.remove();
+    setStatus(
+      "generateStatus",
+      copied ? "کد قرارداد کپی شد." : "کپی خودکار ناموفق بود؛ کد را دستی انتخاب کنید.",
+      copied ? "ok" : "err"
+    );
+  }
+}
+
+function saveSource() {
+  if (!generatedSource || !generatedConfig) {
+    setStatus("generateStatus", "ابتدا Generate را بزنید.", "err");
+    return;
+  }
+
+  try {
+    const safeSymbol = generatedConfig.symbol.replace(/[^A-Za-z0-9_-]/g, "");
+    const blob = new Blob([generatedSource], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = safeSymbol + "Token.sol";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+
+    setTimeout(() => URL.revokeObjectURL(url), 1500);
+    setStatus("generateStatus", "درخواست ذخیره فایل ارسال شد.", "ok");
+  } catch (error) {
+    setStatus("generateStatus", "ذخیره فایل ناموفق بود: " + error.message, "err");
+  }
+}
+
+async function connectWallet() {
+  if ($("network").value !== "bsc") {
+    setStatus("walletStatus", "این اتصال فقط برای کیف پول‌های EVM و شبکه BNB است.", "err");
+    return;
+  }
+
+  if (!window.ethereum) {
+    setStatus(
+      "walletStatus",
+      "کیف پول EVM پیدا نشد. سایت را در مرورگر کیف پول سازگار باز کنید.",
+      "err"
+    );
+    return;
+  }
+
+  try {
+    const accounts = await window.ethereum.request({ method: "eth_requestAccounts" });
+    const chain = await window.ethereum.request({ method: "eth_chainId" });
+    walletAddress = accounts && accounts[0] ? accounts[0] : "";
+
+    setStatus(
+      "walletStatus",
+      walletAddress
+        ? "Connected: " + walletAddress + "\nChain ID: " + chain
+        : "حسابی دریافت نشد.",
+      walletAddress ? "ok" : "err"
+    );
+  } catch (error) {
+    setStatus("walletStatus", error.message || "اتصال ناموفق بود.", "err");
+  }
+}
+
+async function checkWallet() {
+  if (!window.ethereum) {
+    setStatus("walletStatus", "کیف پول EVM پیدا نشد.", "err");
+    return;
+  }
+
+  try {
+    const accounts = await window.ethereum.request({ method: "eth_accounts" });
+    const chain = await window.ethereum.request({ method: "eth_chainId" });
+    walletAddress = accounts && accounts[0] ? accounts[0] : "";
+
+    setStatus(
+      "walletStatus",
+      (walletAddress ? "Account: " + walletAddress : "Wallet not connected") +
+      "\nChain ID: " + chain,
+      walletAddress ? "ok" : ""
+    );
+  } catch (error) {
+    setStatus("walletStatus", error.message || "بررسی ناموفق بود.", "err");
+  }
+}
+
+function validEvmAddress(address) {
+  return /^0x[a-fA-F0-9]{40}$/.test(address);
+}
+
+async function readToken() {
+  const address = $("contractAddress").value.trim();
+
+  if (!address) {
+    setStatus("readStatus", "ابتدا آدرس واقعی قرارداد را وارد کنید.", "err");
+    return;
+  }
+
+  if ($("network").value !== "bsc") {
+    setStatus(
+      "readStatus",
+      "خواندن خودکار قرارداد TRON در این نسخه پیاده‌سازی نشده است."
+    );
+    return;
+  }
+
+  if (!validEvmAddress(address)) {
+    setStatus("readStatus", "آدرس BNB باید 42 نویسه و با 0x شروع شود.", "err");
+    return;
+  }
+
+  try {
+    if (!window.ethers) {
+      throw new Error("کتابخانه ethers بارگذاری نشده است. اتصال اینترنت را بررسی کنید.");
+    }
+
+    const rpc = new ethers.JsonRpcProvider("https://bsc-dataseed.binance.org/");
+    const chain = await rpc.getNetwork();
+
+    if (chain.chainId !== 56n) {
+      throw new Error("اتصال RPC روی BNB Smart Chain نیست.");
+    }
+
+    const bytecode = await rpc.getCode(address);
+    if (bytecode === "0x") {
+      throw new Error("در این آدرس قرارداد فعالی پیدا نشد.");
+    }
+
+    const abi = [
+      "function name() view returns (string)",
+      "function symbol() view returns (string)",
+      "function decimals() view returns (uint8)",
+      "function totalSupply() view returns (uint256)",
+      "function balanceOf(address) view returns (uint256)"
+    ];
+
+    const token = new ethers.Contract(address, abi, rpc);
+    const [name, symbol, decimals, supply] = await Promise.all([
+      token.name(), token.symbol(), token.decimals(), token.totalSupply()
+    ]);
+
+    let balanceText = "موجودی کیف پول بررسی نشد.";
+    if (walletAddress) {
+      try {
+        const balance = await token.balanceOf(walletAddress);
+        balanceText = "Wallet balance: " +
+          ethers.formatUnits(balance, decimals) + " " + symbol;
+      } catch (_) {
+        balanceText = "خواندن موجودی کیف پول ممکن نشد.";
+      }
+    }
+
+    $("tokenDetails").textContent =
+      "Name: " + name + "\n" +
+      "Symbol: " + symbol + "\n" +
+      "Decimals: " + decimals + "\n" +
+      "Total supply: " + ethers.formatUnits(supply, decimals) + "\n" +
+      balanceText;
+
+    setStatus("readStatus", "اطلاعات قرارداد خوانده شد.", "ok");
+  } catch (error) {
+    setStatus("readStatus", error.message || "خواندن قرارداد ناموفق بود.", "err");
+  }
+}
+
+function openExternal(url) {
+  const tab = window.open(url, "_blank");
+  if (!tab) {
+    window.location.href = url;
+  }
+}
+
+function openExplorer() {
+  const address = $("contractAddress").value.trim();
+  const network = $("network").value;
+
+  if (!network) {
+    setStatus("readStatus", "ابتدا شبکه را انتخاب کنید.", "err");
+    return;
+  }
+
+  if (!address) {
+    setStatus("readStatus", "ابتدا آدرس قرارداد را وارد کنید.", "err");
+    return;
+  }
+
+  if (network === "bsc") {
+    if (!validEvmAddress(address)) {
+      setStatus("readStatus", "آدرس BNB معتبر نیست.", "err");
+      return;
+    }
+    openExternal("https://bscscan.com/address/" + encodeURIComponent(address));
+  } else {
+    openExternal("https://tronscan.org/#/contract/" + encodeURIComponent(address));
+  }
+}
+
+async function copyAddress() {
+  const address = $("contractAddress").value.trim();
+
+  if (!address) {
+    setStatus("readStatus", "آدرس قرارداد خالی است.", "err");
+    return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(address);
+    setStatus("readStatus", "آدرس کپی شد.", "ok");
+  } catch (_) {
+    $("contractAddress").focus();
+    $("contractAddress").select();
+    setStatus("readStatus", "آدرس انتخاب شد؛ از منوی گوشی Copy را بزنید.");
+  }
+}
+
+function openCompiler() {
+  openExternal("https://remix.ethereum.org/");
+}
+
+function openDeployTool() {
+  const network = $("network").value;
+
+  if (network === "bsc") {
+    openExternal("https://remix.ethereum.org/");
+  } else if (network === "tron") {
+    openExternal("https://www.tronide.io/");
+  } else {
+    setStatus("networkNote", "ابتدا شبکه را انتخاب کنید.", "err");
+  }
+}
+
+function openVerify() {
+  const network = $("network").value;
+  const address = $("contractAddress").value.trim();
+
+  if (!network) {
+    setStatus("verifyStatus", "ابتدا شبکه را انتخاب کنید.", "err");
+    return;
+  }
+
+  if (network === "bsc") {
+    if (address && !validEvmAddress(address)) {
+      setStatus("verifyStatus", "آدرس BNB معتبر نیست.", "err");
+      return;
+    }
+    openExternal("https://bscscan.com/verifyContract");
+  } else {
+    openExternal("https://tronscan.org/");
+  }
+
+  setStatus("verifyStatus", "صفحه باز شد؛ وریفای باید دستی انجام شود.");
+}
+
+// رویداد دکمه‌ها
+$("startBtn").addEventListener("click", () => {
+  try {
+    getNetwork();
+    updateNetworkInfo();
+    setStatus("networkNote", "شبکه انتخاب شد. حالا مشخصات توکن را وارد کنید.", "ok");
+    $("tokenName").focus();
+  } catch (error) {
+    setStatus("networkNote", error.message, "err");
+  }
+});
+
+$("network").addEventListener("change", () => {
+  updateNetworkInfo();
+  invalidateSource("شبکه تغییر کرد؛ قرارداد را دوباره تولید کنید.");
+});
+
+$("connectBtn").addEventListener("click", connectWallet);
+$("checkWalletBtn").addEventListener("click", checkWallet);
+$("generateBtn").addEventListener("click", generateContract);
+$("copyBtn").addEventListener("click", copySource);
+$("saveBtn").addEventListener("click", saveSource);
+$("readBtn").addEventListener("click", readToken);
+$("explorerBtn").addEventListener("click", openExplorer);
+$("copyAddressBtn").addEventListener("click", copyAddress);
+$("compilerBtn").addEventListener("click", openCompiler);
+$("deployBtn").addEventListener("click", openDeployTool);
+$("verifyBtn").addEventListener("click", openVerify);
+
+["tokenName", "tokenSymbol", "decimals", "supply"].forEach(id => {
+  $(id).addEventListener("input", () => {
+    invalidateSource("مشخصات تغییر کرده؛ برای تولید کد جدید Generate را بزنید.");
+    updateSupply();
+  });
+  $(id).addEventListener("change", updateSupply);
+});
+
+// راه‌اندازی اولیه
+updateNetworkInfo();
+setStatus(
+  "walletStatus",
+  "کیف پول هنوز متصل نیست. برای تولید کد نیازی به اتصال نیست."
+);
+</script>
+</body>
+</html>
+
+    
